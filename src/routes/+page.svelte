@@ -8,15 +8,16 @@
   import { createWebSocketStore } from '$lib/stores/createWebSocketStore';
   import WebSocketService from '$lib/services/WebSocketService';
 
-  const user = crypto.randomUUID().split('-')[0];
+
 
   let wsService: WebSocketService;
   let chatStore: ReturnType<typeof createWebSocketStore>;
   let message = '';
+  let name = '';
 
   const sendMessage = () => {
     if (message.trim() && chatStore) {
-      chatStore.sendMessage({ text: message, user, timestamp: Date.now() });
+      chatStore.sendMessage({ text: message, user: name, timestamp: Date.now() });
       message = '';
     }
   };
@@ -38,11 +39,19 @@
       <CardContent class="pt-6 px-4">
         <div class="space-y-6">
           {#each $chatStore || [] as { text, user, timestamp }}
-            <div class="flex items-start gap-3">
-              <div class="rounded-lg bg-primary/10 p-4">
-                <strong>{new Date(timestamp).toLocaleTimeString()} - {user}:</strong> {text}
+            {#if user === name}
+              <div class="flex justify-self-end gap-3">
+                <div class="rounded-lg bg-primary/10 p-4">
+                  <strong>{new Date(timestamp).toLocaleTimeString()}:</strong> {text}
+                </div>
               </div>
-            </div>
+            {:else}
+              <div class="flex justify-self-start gap-3">
+                <div class="rounded-lg bg-primary/10 p-4">
+                  <strong>{new Date(timestamp).toLocaleTimeString()} - {user}:</strong> {text}
+                </div>
+              </div>
+            {/if}
           {/each}
         </div>
       </CardContent>
@@ -50,6 +59,12 @@
   </Card>
 
   <div class="flex gap-3 pt-2">
+
+    <Input
+      bind:value={name}
+      placeholder="Your Name"
+      class="flex-1"
+    />
     <Input
       bind:value={message}
       placeholder="Type a message..."
